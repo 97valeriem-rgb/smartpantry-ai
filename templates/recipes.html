@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ text('recipe_planner', lang) }} - {{ text('app_name', lang) }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .recipe-page { max-width: 1200px; margin: 0 auto; padding: 30px 20px; }
+        .recipe-header { text-align: center; margin-bottom: 24px; }
+        .recipe-header h1 { font-size: 2.4rem; color: #1b4332; margin-bottom: 8px; }
+        .recipe-header p { color: #4a6a7a; }
+
+        .top-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px; }
+        .top-actions button {
+            padding: 10px 20px; border-radius: 30px; border: none; cursor: pointer;
+            font-weight: 600; font-size: 14px; transition: 0.2s;
+        }
+        .btn-surprise { background: #f4a261; color: white; }
+        .btn-surprise:hover { background: #e08c42; transform: translateY(-2px); }
+        .btn-expiry { background: #2d6a4f; color: white; }
+        .btn-expiry:hover { background: #1b4332; transform: translateY(-2px); }
+        .btn-fav-view { background: rgba(45,106,79,0.1); color: #2d6a4f; }
+        .btn-fav-view:hover { background: rgba(45,106,79,0.2); }
+
+        .recipe-filters {
+            display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
+            margin-bottom: 24px; background: rgba(255,255,255,0.6);
+            padding: 16px; border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.6); backdrop-filter: blur(8px);
+        }
+        .recipe-filters input, .recipe-filters select {
+            padding: 10px 16px; border-radius: 30px;
+            border: 2px solid rgba(45,106,79,0.1);
+            background: white; font-size: 14px; outline: none;
+            font-family: inherit; transition: 0.2s;
+        }
+        .recipe-filters input:focus, .recipe-filters select:focus {
+            border-color: #2d6a4f; box-shadow: 0 0 0 3px rgba(45,106,79,0.1);
+        }
+        .recipe-filters input { min-width: 220px; }
+
+        .history-strip {
+            margin-bottom: 24px;
+            background: rgba(255,255,255,0.6);
+            border-radius: 16px;
+            padding: 12px 16px;
+            border: 1px solid rgba(255,255,255,0.6);
+            display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+        }
+        .history-strip .label { font-weight: 700; color: #1b4332; font-size: 13px; }
+        .history-strip .chip {
+            background: white; padding: 6px 12px; border-radius: 20px;
+            border: 1px solid rgba(45,106,79,0.15);
+            font-size: 13px; cursor: pointer; transition: 0.2s;
+        }
+        .history-strip .chip:hover { background: #2d6a4f; color: white; border-color: #2d6a4f; }
+
+        .recipe-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .recipe-card {
+            background: rgba(255,255,255,0.85); backdrop-filter: blur(10px);
+            border-radius: 20px; padding: 20px;
+            border: 1px solid rgba(255,255,255,0.6);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+            transition: all 0.25s; cursor: pointer;
+            display: flex; flex-direction: column; gap: 10px; position: relative;
+        }
+        .recipe-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 14px 36px rgba(0,0,0,0.08);
+            border-color: rgba(45,106,79,0.2);
+        }
+        .recipe-card .fav-btn {
+            position: absolute; top: 14px; right: 14px;
+            background: none; border: none; font-size: 1.4rem;
+            cursor: pointer; transition: 0.2s; z-index: 2;
+            filter: grayscale(1);
+        }
+        .recipe-card .fav-btn.active { filter: none; transform: scale(1.1); }
+        .recipe-card .fav-btn:hover { transform: scale(1.2); }
+
+        .recipe-card .rc-top {
+            display: flex; justify-content: space-between; align-items: flex-start;
+            padding-right: 30px;
+        }
+        .recipe-card .rc-emoji { font-size: 2.6rem; line-height: 1; }
+        .recipe-card .rc-badge {
+            font-size: 11px; font-weight: 700; padding: 4px 10px;
+            border-radius: 20px; background: #e8f5e9; color: #2d6a4f;
+            text-transform: uppercase; letter-spacing: 0.3px;
+        }
+        .recipe-card .rc-badge.medium { background: #fff3e0; color: #b26a00; }
+        .recipe-card .rc-badge.hard { background: #ffebee; color: #c44536; }
+
+        .recipe-card h3 { font-size: 1.15rem; color: #1b4332; margin: 0; }
+        .recipe-card .rc-meta {
+            display: flex; gap: 12px; font-size: 12px; color: #5a7a8a; flex-wrap: wrap;
+        }
+        .recipe-card .rc-match {
+            background: #f1f8f4; border-radius: 10px; padding: 8px 12px;
+            font-size: 13px; display: flex; justify-content: space-between; align-items: center;
+        }
+        .recipe-card .rc-match .ready { color: #2d6a4f; font-weight: 700; }
+        .recipe-card .rc-match .partial { color: #b26a00; font-weight: 700; }
+        .recipe-card .rc-match .missing { color: #c44536; font-weight: 700; }
+        .expiry-chip {
+            position: absolute; top: 14px; left: 14px;
+            background: #ffebee; color: #c44536;
+            padding: 4px 10px; border-radius: 20px;
+            font-size: 10px; font-weight: 700; letter-spacing: 0.3px;
+        }
+
+        .rc-action { margin-top: auto; display: flex; gap: 8px; }
+        .rc-action button {
+            flex: 1; padding: 10px; border-radius: 30px; border: none;
+            font-weight: 600; font-size: 13px; cursor: pointer; transition: 0.2s;
+        }
+        .btn-cook { background: #2d6a4f; color: white; }
+        .btn-cook:hover { background: #1b4332; }
+        .btn-details { background: rgba(45,106,79,0.1); color: #2d6a4f; }
+        .btn-details:hover { background: rgba(45,106,79,0.2); }
+
+        .recipe-detail-modal {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.5); backdrop-filter: blur(8px);
+            z-index: 5000; align-items: center; justify-content: center; padding: 20px;
+        }
+        .recipe-detail-modal.active { display: flex; }
+        .rd-content {
+            background: white; border-radius: 28px; max-width: 640px; width: 100%;
+            max-height: 90vh; overflow-y: auto; padding: 32px;
+            box-shadow: 0 32px 64px rgba(0,0,0,0.2);
+            position: relative;
+        }
+        .rd-close {
+            position: absolute; top: 18px; right: 18px;
+            width: 36px; height: 36px; border-radius: 50%; border: none;
+            background: #f0f4f8; cursor: pointer; font-size: 18px; color: #4a6a7a;
+        }
+        .rd-close:hover { background: #e0e8f0; }
+
+        .rd-head { display: flex; gap: 16px; align-items: center; margin-bottom: 20px; padding-right: 40px; }
+        .rd-head .rd-emoji { font-size: 3.5rem; }
+        .rd-head h2 { font-size: 1.8rem; color: #1b4332; margin: 0 0 4px 0; display: flex; align-items: center; gap: 8px; }
+
+        .rd-meta-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+        .rd-chip {
+            background: rgba(45,106,79,0.08); color: #2d6a4f;
+            padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;
+        }
+        .fav-toggle {
+            background: none; border: none; font-size: 1.4rem;
+            cursor: pointer; filter: grayscale(1); transition: 0.2s;
+        }
+        .fav-toggle.active { filter: none; transform: scale(1.1); }
+
+        .rd-section { margin-bottom: 22px; }
+        .rd-section h4 {
+            color: #1b4332; margin-bottom: 10px; font-size: 1.05rem;
+            display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+        }
+
+        .rd-ingredients { display: flex; flex-direction: column; gap: 6px; }
+        .rd-ing {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 14px; border-radius: 12px; background: #f8f9fa; font-size: 14px;
+        }
+        .rd-ing.available { background: #e8f5e9; border-left: 4px solid #2d6a4f; }
+        .rd-ing.missing { background: #ffebee; border-left: 4px solid #e76f51; }
+        .rd-ing .ing-name { display: flex; align-items: center; gap: 8px; font-weight: 500; }
+        .rd-ing .ing-status { font-size: 12px; font-weight: 700; }
+        .rd-ing.available .ing-status { color: #2d6a4f; }
+        .rd-ing.missing .ing-status { color: #c44536; }
+
+        .rd-steps { counter-reset: step; display: flex; flex-direction: column; gap: 10px; }
+        .rd-step {
+            counter-increment: step; padding: 12px 14px 12px 52px;
+            background: #f8f9fa; border-radius: 12px; position: relative;
+            font-size: 14px; line-height: 1.5; color: #2a4a5a;
+        }
+        .rd-step::before {
+            content: counter(step);
+            position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+            width: 26px; height: 26px; border-radius: 50%;
+            background: #2d6a4f; color: white; font-weight: 700; font-size: 12px;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .rd-nutrition { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+        .rd-nut { background: #f8f9fa; border-radius: 12px; padding: 12px 6px; text-align: center; }
+        .rd-nut .n-val { font-weight: 700; font-size: 16px; color: #1b4332; display: block; }
+        .rd-nut .n-lbl { font-size: 11px; color: #5a7a8a; }
+
+        .rd-tip {
+            background: #fff8e1; border-left: 4px solid #f4a261;
+            padding: 12px 16px; border-radius: 12px;
+            font-size: 13px; color: #6a5018;
+        }
+
+        .rd-actions { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+        .rd-actions button {
+            flex: 1; min-width: 130px; padding: 12px; border-radius: 30px;
+            border: none; font-weight: 700; font-size: 14px; cursor: pointer; transition: 0.2s;
+        }
+        .btn-primary-rd { background: #2d6a4f; color: white; }
+        .btn-primary-rd:hover { background: #1b4332; transform: translateY(-2px); }
+        .btn-secondary-rd { background: rgba(45,106,79,0.1); color: #2d6a4f; }
+        .btn-secondary-rd:hover { background: rgba(45,106,79,0.2); }
+        .btn-secondary-rd:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .serving-ctrl {
+            display: inline-flex; align-items: center; gap: 10px;
+            background: #f0f4f8; padding: 4px 8px; border-radius: 30px;
+        }
+        .serving-ctrl button {
+            width: 28px; height: 28px; border-radius: 50%; border: none;
+            background: white; cursor: pointer; font-weight: 700;
+            color: #2d6a4f; font-size: 14px;
+        }
+        .serving-ctrl span { font-weight: 700; min-width: 20px; text-align: center; color: #1b4332; }
+
+        .empty-state { text-align: center; padding: 60px 20px; color: #5a7a8a; }
+        .empty-state .icon { font-size: 4rem; display: block; margin-bottom: 12px; }
+
+        .voice-bar {
+            background: #f0f4f8; border-radius: 14px; padding: 10px 14px;
+            display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+            font-size: 13px; margin-top: 8px;
+        }
+        .voice-bar button {
+            padding: 6px 14px; border-radius: 20px; border: none;
+            background: #2d6a4f; color: white; cursor: pointer;
+            font-weight: 600; font-size: 12px;
+        }
+        .voice-bar button.stop { background: #e76f51; }
+        .voice-bar button:hover { opacity: 0.9; }
+
+        @media (max-width: 600px) {
+            .rd-nutrition { grid-template-columns: repeat(3, 1fr); }
+            .recipe-header h1 { font-size: 1.8rem; }
+            .rd-content { padding: 22px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-3d">🥑</div>
+    <div class="floating-3d">🍅</div>
+    <div class="floating-3d">🥦</div>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <span class="logo-icon">🧠</span>
+                <span class="logo-text">SmartPantry</span>
+                <span class="logo-badge">AI</span>
+            </div>
+            <div class="nav-links">
+                <a href="/">{{ text('home', lang) }}</a>
+                <a href="/features">{{ text('features', lang) }}</a>
+                <a href="/recipes" class="active">{{ text('recipes', lang) }}</a>
+                <a href="/about">{{ text('about', lang) }}</a>
+                <a href="/contact">{{ text('contact', lang) }}</a>
+            </div>
+            <div class="nav-actions">
+                <div class="language-switcher" style="display: flex; gap: 4px; align-items: center; margin-right: 10px;">
+                    <a href="/set-language/en" style="text-decoration: none; font-weight: 600; color: {% if lang == 'en' %}#2d6a4f{% else %}#4a6a7a{% endif %}; padding: 2px 8px; border-radius: 4px; {% if lang == 'en' %}background: rgba(45,106,79,0.1);{% endif %}">EN</a>
+                    <span style="color: #4a6a7a;">|</span>
+                    <a href="/set-language/hi" style="text-decoration: none; font-weight: 600; color: {% if lang == 'hi' %}#2d6a4f{% else %}#4a6a7a{% endif %}; padding: 2px 8px; border-radius: 4px; {% if lang == 'hi' %}background: rgba(45,106,79,0.1);{% endif %}">हिंदी</a>
+                </div>
+                {% if session.get('username') %}
+                    <a href="/dashboard" class="btn btn-primary btn-sm">{{ text('dashboard', lang) }}</a>
+                    <a href="/logout" class="btn btn-outline btn-sm">{{ text('logout', lang) }}</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <div class="recipe-page">
+        <div class="recipe-header">
+            <h1>🍳 {{ text('recipe_recommendations', lang) }}</h1>
+            <p>Smart recipe suggestions based on what's in your pantry</p>
+        </div>
+
+        <div class="top-actions">
+            <button class="btn-surprise" onclick="surpriseMe()">🎲 Surprise Me</button>
+            <button class="btn-expiry" onclick="suggestByExpiry()">⏰ Use Expiring First</button>
+            <button class="btn-fav-view" onclick="showFavoritesOnly()">⭐ My Favorites</button>
+            <button class="btn-fav-view" onclick="loadRecipes()">🔄 Show All</button>
+        </div>
+
+        <div class="history-strip" id="historyStrip" style="display:none;">
+            <span class="label">🕘 Recently viewed:</span>
+            <div id="historyChips" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
+        </div>
+
+        <div class="recipe-filters">
+            <input type="text" id="recipeSearch" placeholder="🔍 Search recipes or ingredients..." oninput="applyFilters()">
+            <select id="categoryFilter" onchange="applyFilters()">
+                <option value="all">All Categories</option>
+                <option value="Breakfast">🍳 Breakfast</option>
+                <option value="Lunch">🥗 Lunch</option>
+                <option value="Dinner">🍽️ Dinner</option>
+                <option value="Snack">🍿 Snack</option>
+                <option value="Dessert">🍰 Dessert</option>
+            </select>
+            <select id="difficultyFilter" onchange="applyFilters()">
+                <option value="all">Any Difficulty</option>
+                <option value="Easy">Easy</option>
+                <option value="Medium">Medium</option>
+                <option value="Hard">Hard</option>
+            </select>
+            <select id="timeFilter" onchange="applyFilters()">
+                <option value="all">Any Time</option>
+                <option value="15">Under 15 min</option>
+                <option value="30">Under 30 min</option>
+                <option value="60">Under 60 min</option>
+            </select>
+            <button class="btn btn-outline" onclick="resetFilters()">🔄 Reset</button>
+        </div>
+
+        <div class="recipe-grid" id="recipeGrid">
+            <div class="empty-state"><span class="icon">⏳</span><p>Loading recipes...</p></div>
+        </div>
+    </div>
+
+    <div class="recipe-detail-modal" id="recipeModal">
+        <div class="rd-content">
+            <button class="rd-close" onclick="closeRecipeModal()">✕</button>
+            <div id="recipeModalBody">Loading...</div>
+        </div>
+    </div>
+
+    <script>
+    // ===== GLOBAL STATE =====
+    let allRecipes = [];
+    let currentRecipe = null;
+    let currentServings = 1;
+    let baseServings = 1;
+    let favorites = [];
+
+    // ===== SIMPLE TOAST (fallback if not defined elsewhere) =====
+    function showToast(msg, isErr) {
+        const t = document.createElement('div');
+        t.textContent = msg;
+        t.style.cssText = `position:fixed;bottom:30px;right:30px;background:${isErr?'#e76f51':'#1b4332'};color:white;padding:14px 24px;border-radius:30px;font-weight:600;z-index:99999;box-shadow:0 8px 32px rgba(0,0,0,0.2);font-family:inherit;`;
+        document.body.appendChild(t);
+        setTimeout(() => t.remove(), 3000);
+    }
+
+    // ===== INIT =====
+    document.addEventListener('DOMContentLoaded', () => {
+        loadRecipes();
+        loadFavorites();
+        loadHistory();
+    });
+
+    // ===== LOAD RECIPES =====
+    function loadRecipes() {
+        fetch('/api/recipes/filter?category=all&difficulty=all&max_time=all&search=')
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    allRecipes = data.recipes;
+                    renderRecipes(allRecipes);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                document.getElementById('recipeGrid').innerHTML =
+                    '<div class="empty-state"><span class="icon">❌</span><p>Could not load recipes</p></div>';
+            });
+    }
+
+    function loadFavorites() {
+        fetch('/api/favorites')
+            .then(r => r.json())
+            .then(d => { if (d.success) favorites = d.favorites || []; })
+            .catch(() => {});
+    }
+
+    function loadHistory() {
+        fetch('/api/history')
+            .then(r => r.json())
+            .then(d => {
+                if (d.success && d.history && d.history.length > 0) {
+                    const strip = document.getElementById('historyStrip');
+                    const chips = document.getElementById('historyChips');
+                    chips.innerHTML = d.history.map(h =>
+                        `<span class="chip" onclick="openRecipe(${h.id})">${h.emoji} ${h.name}</span>`
+                    ).join('');
+                    strip.style.display = 'flex';
+                }
+            })
+            .catch(() => {});
+    }
+
+    // ===== RENDER =====
+    function renderRecipes(list) {
+        const grid = document.getElementById('recipeGrid');
+        if (!list || list.length === 0) {
+            grid.innerHTML = '<div class="empty-state"><span class="icon">🔍</span><p>No recipes match your filters</p></div>';
+            return;
+        }
+        grid.innerHTML = list.map(r => {
+            const ready = r.ready_to_cook;
+            const matchClass = ready ? 'ready' : (r.available_count > 0 ? 'partial' : 'missing');
+            const matchText = ready ? '✅ Ready to cook' :
+                             (r.available_count > 0 ? `⚠️ ${r.available_count}/${r.total_count} available` :
+                              '❌ Missing ingredients');
+            const diffClass = r.difficulty.toLowerCase();
+            const isFav = favorites.includes(r.id);
+            const expiryTag = (r.expiry_bonus && r.expiry_bonus > 0)
+                ? `<span class="expiry-chip">⏰ Uses ${r.expiry_bonus} expiring</span>` : '';
+
+            return `
+                <div class="recipe-card" onclick="openRecipe(${r.id})">
+                    ${expiryTag}
+                    <button class="fav-btn ${isFav ? 'active' : ''}"
+                            onclick="event.stopPropagation(); toggleFavorite(${r.id}, this)">⭐</button>
+                    <div class="rc-top">
+                        <div class="rc-emoji">${r.emoji}</div>
+                        <span class="rc-badge ${diffClass}">${r.difficulty}</span>
+                    </div>
+                    <h3>${r.name}</h3>
+                    <div class="rc-meta">
+                        <span>⏱️ ${r.cook_time} min</span>
+                        <span>🍽️ ${r.servings} servings</span>
+                        <span>🏷️ ${r.category}</span>
+                    </div>
+                    <div class="rc-match">
+                        <span class="${matchClass}">${matchText}</span>
+                        <span>${r.match_percent || Math.round((r.available_count/r.total_count)*100)}%</span>
+                    </div>
+                    <div class="rc-action">
+                        <button class="btn-details" onclick="event.stopPropagation(); openRecipe(${r.id})">📖 Details</button>
+                        <button class="btn-cook" onclick="event.stopPropagation(); openRecipe(${r.id}, true)">👨‍🍳 Cook</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // ===== FILTERS =====
+    function applyFilters() {
+        const params = new URLSearchParams({
+            search: document.getElementById('recipeSearch').value,
+            category: document.getElementById('categoryFilter').value,
+            difficulty: document.getElementById('difficultyFilter').value,
+            max_time: document.getElementById('timeFilter').value
+        });
+        fetch('/api/recipes/filter?' + params.toString())
+            .then(r => r.json())
+            .then(d => { if (d.success) renderRecipes(d.recipes); });
+    }
+
+    function resetFilters() {
+        document.getElementById('recipeSearch').value = '';
+        document.getElementById('categoryFilter').value = 'all';
+        document.getElementById('difficultyFilter').value = 'all';
+        document.getElementById('timeFilter').value = 'all';
+        loadRecipes();
+    }
+
+    // ===== FAVORITES =====
+    function toggleFavorite(id, btn) {
+        fetch('/api/favorites', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({recipe_id: id})
+        })
+        .then(r => r.json())
+        .then(d => {
+            if (d.success) {
+                favorites = d.favorites;
+                if (btn) btn.classList.toggle('active', favorites.includes(id));
+                showToast(d.added ? '⭐ Added to favorites' : 'Removed from favorites');
+            }
+        });
+    }
+
+    function showFavoritesOnly() {
+        if (favorites.length === 0) {
+            document.getElementById('recipeGrid').innerHTML =
+                '<div class="empty-state"><span class="icon">⭐</span><p>No favorites yet. Click the star on any recipe!</p></div>';
+            return;
+        }
+        const favList = allRecipes.filter(r => favorites.includes(r.id));
+        renderRecipes(favList);
+    }
+
+    // ===== SURPRISE ME =====
+    function surpriseMe() {
+        console.log('=== SURPRISE ME CLICKED ===');
+        fetch('/api/recipes/random')
+            .then(r => {
+                console.log('Status:', r.status);
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                return r.json();
+            })
+            .then(d => {
+                console.log('Data:', d);
+                if (d.success && d.recipe) {
+                    showToast(`🎲 ${d.recipe.emoji} ${d.recipe.name}`);
+                    openRecipe(d.recipe.id);
+                } else {
+                    showToast('Could not fetch random recipe', true);
+                }
+            })
+            .catch(err => {
+                console.error('Surprise error:', err);
+                showToast('Error: ' + err.message, true);
+            });
+    }
+
+    // ===== EXPIRY SUGGESTIONS =====
+    function suggestByExpiry() {
+        fetch('/api/recipes/suggest-by-expiry')
+            .then(r => r.json())
+            .then(d => {
+                if (d.success) {
+                    renderRecipes(d.recipes);
+                    const withBonus = d.recipes.filter(r => r.expiry_bonus > 0).length;
+                    if (withBonus === 0) {
+                        showToast('⏰ No items expiring soon! Showing best matches.');
+                    } else {
+                        showToast(`⏰ Prioritized ${withBonus} recipes using expiring items!`);
+                    }
+                }
+            });
+    }
+
+    // ===== RECIPE DETAIL =====
+    function openRecipe(id, scrollToSteps = false) {
+        fetch('/api/recipes/' + id)
+            .then(r => r.json())
+            .then(data => {
+                if (!data.success) return;
+                currentRecipe = data.recipe;
+                baseServings = currentRecipe.servings;
+                currentServings = baseServings;
+                renderRecipeModal();
+                document.getElementById('recipeModal').classList.add('active');
+                if (scrollToSteps) {
+                    setTimeout(() => {
+                        document.querySelector('.rd-steps')?.scrollIntoView({behavior:'smooth'});
+                    }, 300);
+                }
+                fetch('/api/history', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({recipe_id: id})
+                }).then(() => loadHistory());
+            });
+    }
+
+    function renderRecipeModal() {
+        const r = currentRecipe;
+        const body = document.getElementById('recipeModalBody');
+        const factor = currentServings / baseServings;
+        const isFav = favorites.includes(r.id);
+
+        const ingredientsHTML = r.ingredients_status.map(ing => {
+            const qty = (ing.quantity * factor).toFixed(ing.quantity * factor % 1 === 0 ? 0 : 1);
+            return `
+                <div class="rd-ing ${ing.available ? 'available' : 'missing'}">
+                    <span class="ing-name">${ing.available ? '✅' : '❌'} ${ing.name}</span>
+                    <span>
+                        <span style="opacity:0.6; font-size:13px;">${qty} ${ing.unit}</span>
+                        <span class="ing-status" style="margin-left:10px;">${ing.available ? 'IN PANTRY' : 'MISSING'}</span>
+                    </span>
+                </div>
+            `;
+        }).join('');
+
+        const stepsHTML = r.steps.map((s, i) =>
+            `<div class="rd-step" data-step="${i+1}">${s}</div>`
+        ).join('');
+
+        const n = r.nutrition;
+        const nutritionHTML = `
+            <div class="rd-nut"><span class="n-val">${Math.round(n.calories*factor)}</span><span class="n-lbl">🔥 kcal</span></div>
+            <div class="rd-nut"><span class="n-val">${(n.protein*factor).toFixed(1)}g</span><span class="n-lbl">💪 Protein</span></div>
+            <div class="rd-nut"><span class="n-val">${(n.carbs*factor).toFixed(1)}g</span><span class="n-lbl">🌾 Carbs</span></div>
+            <div class="rd-nut"><span class="n-val">${(n.fat*factor).toFixed(1)}g</span><span class="n-lbl">🧈 Fat</span></div>
+            <div class="rd-nut"><span class="n-val">${(n.fiber*factor).toFixed(1)}g</span><span class="n-lbl">🌿 Fiber</span></div>
+        `;
+
+        const ready = r.ready_to_cook;
+        const missingList = r.ingredients_status.filter(i => !i.available);
+
+        body.innerHTML = `
+            <div class="rd-head">
+                <span class="rd-emoji">${r.emoji}</span>
+                <div style="flex:1;">
+                    <h2>${r.name}
+                        <button class="fav-toggle ${isFav ? 'active' : ''}"
+                            onclick="toggleFavoriteInModal(${r.id})">⭐</button>
+                    </h2>
+                    <div class="rd-meta-chips">
+                        <span class="rd-chip">🏷️ ${r.category}</span>
+                        <span class="rd-chip">⏱️ ${r.cook_time} min</span>
+                        <span class="rd-chip">📊 ${r.difficulty}</span>
+                        <span class="rd-chip" style="${ready ? 'background:#e8f5e9;color:#2d6a4f;' : 'background:#fff3e0;color:#b26a00;'}">
+                            ${ready ? '✅ Ready to cook' : `⚠️ ${r.available_count}/${r.total_count} ingredients`}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="rd-section">
+                <h4>🍽️ Servings
+                    <span class="serving-ctrl">
+                        <button onclick="changeServings(-1)">−</button>
+                        <span>${currentServings}</span>
+                        <button onclick="changeServings(1)">+</button>
+                    </span>
+                </h4>
+            </div>
+
+            <div class="rd-section">
+                <h4>🧾 Ingredients</h4>
+                <div class="rd-ingredients">${ingredientsHTML}</div>
+            </div>
+
+            <div class="rd-section">
+                <h4>👨‍🍳 Instructions</h4>
+                <div class="rd-steps">${stepsHTML}</div>
+                <div class="voice-bar">
+                    🔊 <strong>Voice:</strong>
+                    <button onclick="speakRecipe()">▶ Read Steps</button>
+                    <button class="stop" onclick="stopSpeaking()">⏹ Stop</button>
+                </div>
+            </div>
+
+            <div class="rd-section">
+                <h4>📊 Nutrition per serving</h4>
+                <div class="rd-nutrition">${nutritionHTML}</div>
+            </div>
+
+            ${r.tips ? `<div class="rd-section"><div class="rd-tip">💡 <strong>Chef's Tip:</strong> ${r.tips}</div></div>` : ''}
+
+            <div class="rd-actions">
+                <button class="btn-primary-rd" onclick="startCooking()">👨‍🍳 Start Cooking</button>
+                <button class="btn-secondary-rd" ${missingList.length === 0 ? 'disabled' : ''}
+                    onclick="addMissingToShoppingList()">🛒 Add Missing (${missingList.length})</button>
+                <button class="btn-secondary-rd" onclick="printRecipe()">🖨️ Print</button>
+                <button class="btn-secondary-rd" onclick="shareRecipe()">🔗 Share</button>
+            </div>
+        `;
+    }
+
+    function toggleFavoriteInModal(id) {
+        fetch('/api/favorites', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({recipe_id: id})
+        })
+        .then(r => r.json())
+        .then(d => {
+            if (d.success) {
+                favorites = d.favorites;
+                renderRecipeModal();
+                showToast(d.added ? '⭐ Added to favorites' : 'Removed from favorites');
+            }
+        });
+    }
+
+    function changeServings(delta) {
+        currentServings = Math.max(1, currentServings + delta);
+        renderRecipeModal();
+    }
+
+    function closeRecipeModal() {
+        stopSpeaking();
+        document.getElementById('recipeModal').classList.remove('active');
+    }
+
+    function startCooking() {
+        if (!currentRecipe) return;
+        showToast(`🍳 Cooking "${currentRecipe.name}" — enjoy!`);
+        closeRecipeModal();
+    }
+
+    function addMissingToShoppingList() {
+        if (!currentRecipe) return;
+        const missing = currentRecipe.ingredients_status.filter(i => !i.available);
+        if (missing.length === 0) { showToast('✅ All ingredients available!', true); return; }
+        let cart = JSON.parse(localStorage.getItem('sp_cart') || '[]');
+        missing.forEach(m => cart.push({name: m.name, qty: m.quantity, unit: m.unit}));
+        localStorage.setItem('sp_cart', JSON.stringify(cart));
+        showToast(`🛒 Added ${missing.length} missing item(s) to shopping list!`);
+        closeRecipeModal();
+    }
+
+    function printRecipe() {
+        if (!currentRecipe) return;
+        const r = currentRecipe;
+        const w = window.open('', '_blank');
+        w.document.write(`
+            <html><head><title>${r.name}</title>
+            <style>
+                body{font-family:Segoe UI,sans-serif;padding:40px;max-width:700px;margin:auto;color:#1b4332;}
+                h1{color:#2d6a4f;border-bottom:3px solid #2d6a4f;padding-bottom:10px;}
+                h3{margin-top:24px;} ul,ol{padding-left:22px;} li{margin:6px 0;}
+                .meta{color:#666;font-size:14px;margin-bottom:16px;}
+            </style></head><body>
+            <h1>${r.emoji} ${r.name}</h1>
+            <div class="meta">⏱️ ${r.cook_time} min · 🍽️ ${currentServings} servings · ${r.category} · ${r.difficulty}</div>
+            <h3>Ingredients</h3>
+            <ul>${r.ingredients_status.map(i=>`<li>${(i.quantity*(currentServings/baseServings)).toFixed(1).replace(/\.0$/,'')} ${i.unit} ${i.name}</li>`).join('')}</ul>
+            <h3>Instructions</h3>
+            <ol>${r.steps.map(s=>`<li>${s}</li>`).join('')}</ol>
+            <h3>Nutrition per serving</h3>
+            <p>🔥 ${r.nutrition.calories} kcal · 💪 ${r.nutrition.protein}g · 🌾 ${r.nutrition.carbs}g · 🧈 ${r.nutrition.fat}g</p>
+            ${r.tips?`<h3>Tip</h3><p>${r.tips}</p>`:''}
+            </body></html>
+        `);
+        w.document.close();
+        w.print();
+    }
+
+    function shareRecipe() {
+        if (!currentRecipe) return;
+        const url = window.location.origin + '/recipes#' + currentRecipe.id;
+        const shareText = `${currentRecipe.emoji} ${currentRecipe.name} — check out this recipe on SmartPantry AI`;
+        if (navigator.share) {
+            navigator.share({title: currentRecipe.name, text: shareText, url: url}).catch(() => {});
+        } else if (navigator.clipboard) {
+            navigator.clipboard.writeText(`${shareText}\n${url}`)
+                .then(() => showToast('🔗 Recipe link copied to clipboard!'))
+                .catch(() => showToast('Could not copy link', true));
+        } else {
+            prompt('Copy this link:', url);
+        }
+    }
+
+    function speakRecipe() {
+        if (!currentRecipe) return;
+        if (!('speechSynthesis' in window)) {
+            showToast('Voice not supported in this browser', true);
+            return;
+        }
+        stopSpeaking();
+        const steps = currentRecipe.steps;
+        let i = 0;
+        function next() {
+            if (i >= steps.length) return;
+            const u = new SpeechSynthesisUtterance(`Step ${i+1}. ${steps[i]}`);
+            u.rate = 0.95;
+            u.onend = () => { i++; next(); };
+            window.speechSynthesis.speak(u);
+        }
+        next();
+        showToast('🔊 Reading recipe steps aloud...');
+    }
+
+    function stopSpeaking() {
+        if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    }
+
+    // ===== CLOSE HANDLERS =====
+    document.getElementById('recipeModal').addEventListener('click', function(e) {
+        if (e.target === this) closeRecipeModal();
+    });
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') closeRecipeModal();
+    });
+    </script>
+</body>
+</html>

@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ text('app_name', lang) }} - {{ text('dashboard', lang) }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- Floating elements -->
+    <div class="floating-3d">🥑</div>
+    <div class="floating-3d">🍅</div>
+    <div class="floating-3d">🥦</div>
+    <div class="floating-3d">🍆</div>
+    <div class="floating-3d">🌽</div>
+    <div class="floating-3d">🥕</div>
+    <div class="floating-3d">🍎</div>
+
+    <div class="app-container">
+        <!-- Header -->
+        <div class="header">
+            <h2>🧠 {{ text('app_name', lang) }}</h2>
+            <div>
+                <!-- Language Switcher -->
+                <div class="language-switcher" style="display: inline-flex; gap: 4px; align-items: center; margin-right: 15px;">
+                    <a href="/set-language/en" style="text-decoration: none; font-weight: 600; color: {% if lang == 'en' %}#2d6a4f{% else %}#4a6a7a{% endif %}; padding: 2px 8px; border-radius: 4px; {% if lang == 'en' %}background: rgba(45,106,79,0.1);{% endif %}">EN</a>
+                    <span style="color: #4a6a7a;">|</span>
+                    <a href="/set-language/hi" style="text-decoration: none; font-weight: 600; color: {% if lang == 'hi' %}#2d6a4f{% else %}#4a6a7a{% endif %}; padding: 2px 8px; border-radius: 4px; {% if lang == 'hi' %}background: rgba(45,106,79,0.1);{% endif %}">हिंदी</a>
+                </div>
+                <span>👤 {{ username }}</span>
+                <a href="{{ url_for('logout') }}" class="btn btn-danger">{{ text('logout', lang) }}</a>
+            </div>
+        </div>
+
+        <!-- Algorithm Cards -->
+        <div class="algo-grid">
+            <div class="algo-card" onclick="window.location.href='/inventory'">
+                <div class="icon">📦</div>
+                <h3>{{ text('inventory', lang) }}</h3>
+                <span class="algo-tag">{{ text('low_stock', lang) }}</span>
+                <p>{{ total_items }} {{ text('total_items', lang) }} · {{ low_stock|length }} {{ text('low_stock', lang) }}</p>
+                <div class="value-preview">
+                    <span class="label">📊 {{ text('low_stock', lang) }}</span>
+                    <span class="value {% if low_stock|length > 2 %}danger{% else %}success{% endif %}">
+                        {{ low_stock|length }} {{ text('need_restock', lang) }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="algo-card" onclick="window.location.href='/expiry'">
+                <div class="icon">⏰</div>
+                <h3>{{ text('expiry_alerts', lang) }}</h3>
+                <span class="algo-tag">{{ text('expiring_soon', lang) }}</span>
+                <p>{{ expiring|length }} {{ text('expiring_soon', lang) }}</p>
+                <div class="value-preview">
+                    <span class="label">📅 {{ text('days_left', lang) }}</span>
+                    <span class="value {% if expiring|length > 0 %}danger{% else %}success{% endif %}">
+                        {% if expiring|length > 0 %}⚠️ {{ expiring|length }} items{% else %}✅ {{ text('all_stocked', lang) }}{% endif %}
+                    </span>
+                </div>
+            </div>
+
+            <div class="algo-card" onclick="window.location.href='/shopping'">
+                <div class="icon">🛒</div>
+                <h3>{{ text('shopping_list', lang) }}</h3>
+                <span class="algo-tag">{{ text('shopping_list', lang) }}</span>
+                <p>{{ text('generate_list', lang) }}</p>
+                <div class="value-preview">
+                    <span class="label">📋 {{ text('items_to_buy', lang) }}</span>
+                    <span class="value">{{ low_stock|length }}</span>
+                </div>
+            </div>
+
+            <div class="algo-card" onclick="window.location.href='/recipes'">
+                <div class="icon">🍳</div>
+                <h3>{{ text('recipe_planner', lang) }}</h3>
+                <span class="algo-tag">{{ text('recipe_recommendations', lang) }}</span>
+                <p>{{ text('recipes_ready', lang) }}</p>
+                <div class="value-preview">
+                    <span class="label">🍽️ {{ text('recipes_ready', lang) }}</span>
+                    <span class="value success">6 {{ text('available', lang) }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panels -->
+        <div class="row-panels">
+            <div class="panel">
+                <div class="panel-title">
+                    📦 {{ text('pantry', lang) }}
+                    <span class="count">{{ total_items }} items</span>
+                    <button class="btn btn-sm" style="margin-left: auto;" onclick="window.location.href='/inventory'">+ {{ text('add_item', lang) }}</button>
+                </div>
+                <div class="inventory-list" id="inventoryList">
+                    {% for item in items[:5] %}
+                    <div class="item-row">
+                        <span class="item-name">
+                            <span class="emoji">
+                                {% if 'apple' in item.name.lower() %}🍎
+                                {% elif 'egg' in item.name.lower() %}🥚
+                                {% elif 'bread' in item.name.lower() %}🍞
+                                {% elif 'milk' in item.name.lower() %}🥛
+                                {% elif 'cheese' in item.name.lower() %}🧀
+                                {% elif 'tomato' in item.name.lower() %}🍅
+                                {% elif 'onion' in item.name.lower() %}🧅
+                                {% elif 'chicken' in item.name.lower() %}🍗
+                                {% else %}📦{% endif %}
+                            </span>
+                            {{ item.name }}
+                        </span>
+                        <span class="badge {% if item.quantity <= 2 %}warning{% endif %}">
+                            {{ item.quantity }} {{ item.unit }}
+                        </span>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="flex-between mt-2">
+                    <span class="glass-stat">⚠️ {{ low_stock|length }} {{ text('low_stock', lang) }}</span>
+                    <span class="glass-stat">⏳ {{ expiring|length }} {{ text('expiring_soon', lang) }}</span>
+                    <button class="btn btn-sm btn-outline" onclick="window.location.href='/inventory'">🔄 {{ text('refresh', lang) }}</button>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">
+                    📊 {{ text('analytics', lang) }}
+                    <button class="btn btn-sm" style="margin-left: auto;" onclick="predictUsage()">🤖 {{ text('predict', lang) }}</button>
+                    <button class="btn btn-sm btn-primary" style="margin-left: 5px;" onclick="showNutrition()">🥗 {{ text('nutrition', lang) }}</button>
+                </div>
+                
+                <div class="stat-item">
+                    <span class="stat-label">💰 {{ text('monthly_expense', lang) }}</span>
+                    <span class="stat-value">₹142</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">📈 {{ text('usage_forecast', lang) }}</span>
+                    <span class="stat-value">+12% milk · -4% eggs</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">🗑️ {{ text('waste_analysis', lang) }}</span>
+                    <span class="stat-value" style="color: var(--primary);">↓ 23%</span>
+                </div>
+                
+                <div class="tip-box" style="margin-top: 12px; background: rgba(45,106,79,0.06); padding: 12px 16px; border-radius: 12px; border: 1px solid rgba(45,106,79,0.08);">
+                    <span style="font-size: 1.2rem; margin-right: 8px;">💡</span>
+                    <span style="font-weight: 500;">{{ text('budget_tip', lang) }}</span>
+                    <button class="btn btn-sm btn-outline" style="margin-left: 10px;" onclick="applyBudgetTip()">{{ text('apply', lang) }}</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer-summary">
+            <span>✅ 6 AI Algorithms Active</span>
+            <span class="dot">·</span>
+            <span>🔬 Inventory · Expiry · Shopping · Recipes</span>
+            <span class="dot">·</span>
+            <button class="btn btn-sm btn-outline" onclick="checkStatus()">🔄 Refresh</button>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal()">✕</button>
+            <h3 id="modalTitle">{{ text('loading', lang) }}</h3>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <!-- Nutrition Modal -->
+    <div id="nutritionModal" class="modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeNutritionModal()">✕</button>
+            <h3>🥗 {{ text('nutrition', lang) }}</h3>
+            <div id="nutritionContent">
+                <p>{{ text('loading', lang) }}</p>
+            </div>
+        </div>
+    </div>
+
+<div class="header-actions">
+    <a href="{{ url_for('profile') }}" class="btn">👤 Profile</a>
+    <a href="{{ url_for('logout') }}" class="btn btn-danger btn-sm">Logout</a>
+</div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script>
+        function showNutrition() {
+            const modal = document.getElementById('nutritionModal');
+            const content = document.getElementById('nutritionContent');
+            modal.style.display = 'flex';
+            content.innerHTML = '<p>Loading...</p>';
+            
+            fetch('/api/pantry-nutrition')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const n = data.total_nutrition;
+                        content.innerHTML = `
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0;">
+                                <div style="background: #f8f9fa; padding: 16px; border-radius: 12px; text-align: center;">
+                                    <div style="font-size: 28px;">🔥</div>
+                                    <div style="font-size: 24px; font-weight: 700; color: #1b4332;">${n.calories.toFixed(0)}</div>
+                                    <div style="color: #4a6a7a;">Total Calories</div>
+                                </div>
+                                <div style="background: #f8f9fa; padding: 16px; border-radius: 12px; text-align: center;">
+                                    <div style="font-size: 28px;">💪</div>
+                                    <div style="font-size: 24px; font-weight: 700; color: #1b4332;">${n.protein.toFixed(1)}g</div>
+                                    <div style="color: #4a6a7a;">Protein</div>
+                                </div>
+                                <div style="background: #f8f9fa; padding: 16px; border-radius: 12px; text-align: center;">
+                                    <div style="font-size: 28px;">🌾</div>
+                                    <div style="font-size: 24px; font-weight: 700; color: #1b4332;">${n.carbs.toFixed(1)}g</div>
+                                    <div style="color: #4a6a7a;">Carbs</div>
+                                </div>
+                                <div style="background: #f8f9fa; padding: 16px; border-radius: 12px; text-align: center;">
+                                    <div style="font-size: 28px;">🧈</div>
+                                    <div style="font-size: 24px; font-weight: 700; color: #1b4332;">${n.fat.toFixed(1)}g</div>
+                                    <div style="color: #4a6a7a;">Fat</div>
+                                </div>
+                                <div style="background: #f8f9fa; padding: 16px; border-radius: 12px; text-align: center; grid-column: span 2;">
+                                    <div style="font-size: 28px;">🌿</div>
+                                    <div style="font-size: 24px; font-weight: 700; color: #1b4332;">${n.fiber.toFixed(1)}g</div>
+                                    <div style="color: #4a6a7a;">Fiber</div>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        content.innerHTML = `<p style="color: #e76f51;">${data.message}</p>`;
+                    }
+                })
+                .catch(error => {
+                    content.innerHTML = '<p style="color: #e76f51;">Error loading nutrition data</p>';
+                });
+        }
+
+        function closeNutritionModal() {
+            document.getElementById('nutritionModal').style.display = 'none';
+        }
+
+        document.addEventListener('click', function(e) {
+            const modal = document.getElementById('nutritionModal');
+            if (modal && e.target === modal) {
+                closeNutritionModal();
+            }
+        });
+    </script>
+</body>
+</html>

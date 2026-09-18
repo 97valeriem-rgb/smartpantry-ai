@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - SmartPantry AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        /* Reuse login page styles by including them inline */
+        .auth-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1.5rem;
+            position: relative;
+            z-index: 10;
+        }
+        .auth-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(24px);
+            padding: 2.8rem 2.5rem;
+            border-radius: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 30px 70px rgba(0, 30, 20, 0.10);
+            max-width: 440px;
+            width: 100%;
+            position: relative;
+        }
+        .auth-lang {
+            position: absolute;
+            top: 1.2rem;
+            right: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8rem;
+            color: #7a8a9a;
+        }
+        .auth-lang .active {
+            background: rgba(45, 106, 79, 0.08);
+            color: #2d6a4f;
+            padding: 0.2rem 0.6rem;
+            border-radius: 8px;
+            font-weight: 700;
+        }
+        .auth-lang .divider { opacity: 0.4; }
+        .auth-lang span:not(.active):not(.divider) { cursor: pointer; }
+        .auth-lang span:not(.active):not(.divider):hover { color: #2d6a4f; }
+        .auth-logo { text-align: center; margin-bottom: 1.5rem; }
+        .auth-logo-icon { font-size: 3rem; display: inline-block; margin-bottom: 0.4rem; }
+        .auth-logo h1 {
+            font-size: 1.6rem; font-weight: 800; color: #1b4332;
+            letter-spacing: -0.02em; margin-bottom: 0.3rem;
+        }
+        .auth-logo h1 span {
+            background: linear-gradient(135deg, #2d6a4f, #52b788);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .auth-welcome { text-align: center; margin-bottom: 1.8rem; }
+        .auth-welcome h2 { font-size: 1.4rem; font-weight: 700; color: #1b4332; margin-bottom: 0.3rem; }
+        .auth-welcome p { font-size: 0.9rem; color: #7a8a9a; }
+        .form-field { margin-bottom: 1rem; position: relative; }
+        .form-field label {
+            display: block; font-size: 0.8rem; font-weight: 600;
+            color: #4a6a7a; margin-bottom: 0.4rem; padding-left: 0.3rem;
+        }
+        .form-field input {
+            width: 100%; padding: 0.9rem 1.2rem;
+            border: 1.5px solid rgba(0, 0, 0, 0.06);
+            border-radius: 16px; font-size: 0.95rem;
+            font-family: inherit; background: rgba(255, 255, 255, 0.9);
+            transition: all 0.25s ease; outline: none; color: #1a2e3b;
+        }
+        .form-field input:focus {
+            border-color: #2d6a4f;
+            box-shadow: 0 0 0 4px rgba(45, 106, 79, 0.10);
+            background: #ffffff;
+        }
+        .form-field input::placeholder { color: #a8b8c4; }
+        .password-wrapper { position: relative; }
+        .password-wrapper input { padding-right: 3rem; }
+        .password-toggle {
+            position: absolute; right: 0.6rem; top: 50%;
+            transform: translateY(-50%); background: none; border: none;
+            cursor: pointer; font-size: 1.1rem; padding: 0.4rem;
+            border-radius: 8px; color: #7a8a9a;
+        }
+        .password-toggle:hover { background: rgba(45, 106, 79, 0.06); }
+        .submit-btn {
+            width: 100%; padding: 1rem;
+            background: linear-gradient(135deg, #2d6a4f, #409f7a);
+            color: white; border: none; border-radius: 50px;
+            font-size: 1rem; font-weight: 700; font-family: inherit;
+            cursor: pointer; transition: all 0.3s ease;
+            box-shadow: 0 10px 24px rgba(45, 106, 79, 0.28);
+            display: flex; align-items: center; justify-content: center;
+            gap: 0.5rem; margin-top: 0.5rem;
+        }
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 32px rgba(45, 106, 79, 0.38);
+            background: linear-gradient(135deg, #1b4332, #2d6a4f);
+        }
+        .submit-btn .arrow { transition: transform 0.3s ease; font-size: 1.1rem; }
+        .submit-btn:hover .arrow { transform: translateX(5px); }
+        .auth-footer-links {
+            text-align: center; margin-top: 1.2rem;
+            font-size: 0.9rem; color: #7a8a9a;
+        }
+        .auth-footer-links a {
+            color: #2d6a4f; font-weight: 700;
+            text-decoration: none; margin-left: 4px;
+        }
+        .auth-footer-links a:hover { text-decoration: underline; }
+        .back-home {
+            display: block; text-align: center; margin-top: 1rem;
+            color: #7a8a9a; font-size: 0.85rem;
+            text-decoration: none;
+        }
+        .back-home:hover { color: #2d6a4f; }
+        .auth-alert {
+            padding: 0.75rem 1rem; border-radius: 14px;
+            font-size: 0.85rem; margin-bottom: 1rem;
+            text-align: center;
+        }
+        .auth-alert.error {
+            background: rgba(231, 111, 81, 0.10);
+            color: #c44536;
+            border: 1px solid rgba(231, 111, 81, 0.2);
+        }
+        .password-hint {
+            font-size: 0.75rem; color: #a8b8c4;
+            margin-top: 0.4rem; padding-left: 0.3rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-3d">🥑</div>
+    <div class="floating-3d">🍅</div>
+    <div class="floating-3d">🥦</div>
+    <div class="floating-3d">🍆</div>
+    <div class="floating-3d">🌽</div>
+
+    <div class="auth-page">
+        <div class="auth-card">
+            <div class="auth-lang">
+                <span class="active">EN</span>
+                <span class="divider">|</span>
+                <span>हिंदी</span>
+            </div>
+
+            <div class="auth-logo">
+                <div class="auth-logo-icon">🧠</div>
+                <h1>Smart<span>Pantry</span> AI</h1>
+            </div>
+
+            <div class="auth-welcome">
+                <h2>Create Your Account</h2>
+                <p>Join 50,000+ smart kitchens</p>
+            </div>
+
+            {% if error %}
+            <div class="auth-alert error">⚠️ {{ error }}</div>
+            {% endif %}
+
+            <form method="POST" action="{{ url_for('signup') }}">
+                <div class="form-field">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" placeholder="Choose a username" required autofocus>
+                </div>
+
+                <div class="form-field">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" placeholder="you@example.com" required>
+                </div>
+
+                <div class="form-field">
+                    <label for="password">Password</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="password" name="password" placeholder="••••••••" required minlength="4">
+                        <button type="button" class="password-toggle" onclick="togglePassword('password', this)">👁️</button>
+                    </div>
+                    <div class="password-hint">Minimum 4 characters</div>
+                </div>
+
+                <button type="submit" class="submit-btn">
+                    Create Account <span class="arrow">→</span>
+                </button>
+            </form>
+
+            <div class="auth-footer-links">
+                Already have an account?
+                <a href="{{ url_for('login') }}">Login</a>
+            </div>
+
+            <a href="{{ url_for('index') }}" class="back-home">← Back to Home</a>
+        </div>
+    </div>
+
+    <script>
+        function togglePassword(id, btn) {
+            const input = document.getElementById(id);
+            if (input.type === 'password') {
+                input.type = 'text';
+                btn.textContent = '🙈';
+            } else {
+                input.type = 'password';
+                btn.textContent = '👁️';
+            }
+        }
+    </script>
+</body>
+</html>

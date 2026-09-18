@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ text('app_name', lang) }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- Floating objects -->
+    <div class="floating-3d">🥑</div>
+    <div class="floating-3d">🍅</div>
+    <div class="floating-3d">🥦</div>
+    <div class="floating-3d">🍆</div>
+    <div class="floating-3d">🌽</div>
+    <div class="floating-3d">🥕</div>
+    <div class="floating-3d">🍎</div>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+    <div class="nav-container">
+        <div class="nav-logo">
+            <span>🧠</span>
+            <span>SmartPantry AI</span>
+        </div>
+
+        <div class="nav-links">
+            <a href="{{ url_for('index') }}">Home</a>
+            <a href="{{ url_for('features') }}">Features</a>
+            <a href="{{ url_for('recipes') }}">Recipes</a>
+            <a href="{{ url_for('about') }}">About Us</a>
+            <a href="{{ url_for('contact') }}">Contact</a>
+        </div>
+
+        <div class="nav-actions">
+            {% if session.get('username') %}
+                <a href="{{ url_for('dashboard') }}" class="btn-primary">Dashboard</a>
+                <a href="{{ url_for('logout') }}" class="btn-outline">Logout</a>
+            {% else %}
+                <a href="{{ url_for('login') }}" class="btn-primary">Login</a>
+                <a href="{{ url_for('signup') }}" class="btn-outline">Sign Up</a>
+            {% endif %}
+        </div>
+    </div>
+</nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-container">
+            <div class="hero-content">
+                <div class="hero-badge">{{ text('ai_powered', lang) }}</div>
+                <h1>{{ text('hero_title', lang) }}</h1>
+                <p class="hero-description">{{ text('hero_description', lang) }}</p>
+                <div class="hero-buttons">
+                    {% if session.get('username') %}
+                        <a href="/dashboard" class="btn btn-primary btn-large">{{ text('dashboard', lang) }}</a>
+                    {% else %}
+                        <a href="/signup" class="btn btn-primary btn-large">{{ text('get_started', lang) }}</a>
+                        <a href="/features" class="btn btn-secondary btn-large">{{ text('learn_more', lang) }}</a>
+                    {% endif %}
+                </div>
+                <div class="hero-stats">
+                    <div class="hero-stat">
+                        <span class="stat-number">15K+</span>
+                        <span class="stat-label">{{ text('Money Saved', lang) }}</span>
+                    </div>
+                    <div class="hero-stat">
+                        <span class="stat-number">50K+</span>
+                        <span class="stat-label">{{ text('active_users', lang) }}</span>
+                    </div>
+                    <div class="hero-stat">
+                        <span class="stat-number">30%</span>
+                        <span class="stat-label">{{ text('waste_reduction', lang) }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-image">
+                <div class="hero-emoji-grid">
+                    <div class="emoji-item">🥑</div>
+                    <div class="emoji-item">🍅</div>
+                    <div class="emoji-item">🥦</div>
+                    <div class="emoji-item">🍆</div>
+                    <div class="emoji-item">🌽</div>
+                    <div class="emoji-item">🥕</div>
+                    <div class="emoji-item">🍎</div>
+                    <div class="emoji-item">🍊</div>
+                    <div class="emoji-item">🍋</div>
+                    <div class="emoji-item">🍇</div>
+                    <div class="emoji-item">🍓</div>
+                    <div class="emoji-item">🥝</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="home-features">
+        <div class="section-header">
+            <span class="section-tag">{{ text('features', lang) }}</span>
+            <h2>{{ text('features_title', lang) }}</h2>
+            <p>{{ text('features_subtitle', lang) }}</p>
+        </div>
+        <div class="features-grid-home">
+            <div class="feature-card-home">
+                <div class="feature-icon">🤖</div>
+                <h3>{{ text('smart_inventory', lang) }}</h3>
+                <p>{{ text('hero_description', lang) }}</p>
+            </div>
+            <div class="feature-card-home">
+                <div class="feature-icon">🍽️</div>
+                <h3>{{ text('recipe_recommendations', lang) }}</h3>
+                <p>{{ text('hero_description', lang) }}</p>
+            </div>
+            <div class="feature-card-home">
+                <div class="feature-icon">📋</div>
+                <h3>{{ text('shopping_list', lang) }}</h3>
+                <p>{{ text('hero_description', lang) }}</p>
+            </div>
+            <div class="feature-card-home">
+                <div class="feature-icon">⏰</div>
+                <h3>{{ text('expiry_alerts', lang) }}</h3>
+                <p>{{ text('hero_description', lang) }}</p>
+            </div>
+            <div class="feature-card-home">
+                <div class="feature-icon">💰</div>
+                <h3>{{ text('budget_tracker', lang) }}</h3>
+                <p>{{ text('hero_description', lang) }}</p>
+            </div>
+            <div class="feature-card-home">
+                <div class="feature-icon">📊</div>
+                <h3>{{ text('analytics', lang) }}</h3>
+                <p>{{ text('hero_description', lang) }}</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="how-it-works">
+        <div class="section-header">
+            <span class="section-tag">{{ text('how_it_works', lang) }}</span>
+            <h2>{{ text('simple_intelligent', lang) }}</h2>
+        </div>
+        <div class="steps-grid">
+            <div class="step-item">
+                <div class="step-number">1</div>
+                <div class="step-icon">📦</div>
+                <h3>{{ text('step1_title', lang) }}</h3>
+                <p>{{ text('step1_desc', lang) }}</p>
+            </div>
+            <div class="step-item">
+                <div class="step-number">2</div>
+                <div class="step-icon">🤖</div>
+                <h3>{{ text('step2_title', lang) }}</h3>
+                <p>{{ text('step2_desc', lang) }}</p>
+            </div>
+            <div class="step-item">
+                <div class="step-number">3</div>
+                <div class="step-icon">📊</div>
+                <h3>{{ text('step3_title', lang) }}</h3>
+                <p>{{ text('step3_desc', lang) }}</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>🧠 {{ text('app_name', lang) }}</h4>
+                <p>{{ text('hero_description', lang) }}</p>
+                <div style="margin-top: 10px; display: flex; gap: 8px;">
+                    <a href="#" style="color: #fff; text-decoration: none; font-size: 20px;">📱</a>
+                    <a href="#" style="color: #fff; text-decoration: none; font-size: 20px;">🐦</a>
+                    <a href="#" style="color: #fff; text-decoration: none; font-size: 20px;">📘</a>
+                    <a href="#" style="color: #fff; text-decoration: none; font-size: 20px;">📷</a>
+                </div>
+            </div>
+            <div class="footer-section">
+                <h4>{{ text('quick_links', lang) }}</h4>
+                <a href="/">{{ text('home', lang) }}</a>
+                <a href="/features">{{ text('features', lang) }}</a>
+                <a href="/recipes">{{ text('recipes', lang) }}</a>
+                <a href="/about">{{ text('about', lang) }}</a>
+            </div>
+            <div class="footer-section">
+                <h4>{{ text('support', lang) }}</h4>
+                <a href="/contact">{{ text('contact', lang) }}</a>
+                <a href="#">FAQ</a>
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms</a>
+            </div>
+            <div class="footer-section">
+                <h4>{{ text('newsletter', lang) }}</h4>
+                <p style="font-size: 14px; opacity: 0.8;">{{ text('subscribe', lang) }}</p>
+                <form action="/subscribe" method="POST" style="display: flex; gap: 6px; margin-top: 6px;">
+                    <input type="email" name="email" placeholder="{{ text('email_placeholder', lang) }}" required style="padding: 8px 12px; border: none; border-radius: 20px; flex: 1; font-size: 13px;">
+                    <button type="submit" style="padding: 8px 16px; border: none; border-radius: 20px; background: #2d6a4f; color: white; font-weight: 600; cursor: pointer; font-size: 13px;">{{ text('subscribe', lang) }}</button>
+                </form>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>© 2026 {{ text('app_name', lang) }}. {{ text('all_rights_reserved', lang) }}</p>
+        </div>
+    </footer>
+
+    <script>
+        function toggleNav() {
+            document.querySelector('.nav-links').classList.toggle('show');
+            document.querySelector('.nav-actions').classList.toggle('show');
+        }
+    </script>
+</body>
+</html>

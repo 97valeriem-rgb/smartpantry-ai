@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory - {{ text('app_name', lang) }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .page-wrap { max-width: 1200px; margin: 0 auto; padding: 30px 20px; }
+        .page-head { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 24px; }
+        .page-head h1 { font-size: 2rem; color: #1b4332; }
+        .stat-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px; }
+        .stat-card { background: rgba(255,255,255,0.85); backdrop-filter: blur(10px); padding: 20px; border-radius: 20px; box-shadow: 0 4px 16px rgba(0,0,0,0.05); text-align: center; border: 1px solid rgba(255,255,255,0.6); }
+        .stat-card .val { font-size: 2rem; font-weight: 700; color: #1b4332; display: block; }
+        .stat-card .lbl { font-size: 13px; color: #5a7a8a; }
+        .inv-table { background: rgba(255,255,255,0.85); backdrop-filter: blur(10px); border-radius: 20px; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.05); }
+        .inv-row { display: grid; grid-template-columns: 2fr 1fr 1fr 1.2fr 1fr; gap: 12px; padding: 16px 20px; border-bottom: 1px solid #f0f0f0; align-items: center; }
+        .inv-row:last-child { border-bottom: none; }
+        .inv-row.header { background: #f8f9fa; font-weight: 700; color: #1b4332; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .inv-row .name { font-weight: 600; color: #1b4332; display: flex; align-items: center; gap: 8px; }
+        .qty-pill { padding: 4px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; display: inline-block; }
+        .qty-pill.ok { background: #e8f5e9; color: #2d6a4f; }
+        .qty-pill.low { background: #ffebee; color: #c44536; }
+        .btn-update { background: rgba(45,106,79,0.1); color: #2d6a4f; border: none; padding: 6px 14px; border-radius: 20px; cursor: pointer; font-weight: 600; font-size: 12px; }
+        .btn-update:hover { background: #2d6a4f; color: white; }
+        @media (max-width: 700px) { .inv-row { grid-template-columns: 1fr 1fr; } }
+    </style>
+</head>
+<body>
+    <div class="floating-3d">🥑</div>
+    <div class="floating-3d">🍅</div>
+    <div class="floating-3d">🥦</div>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <span class="logo-icon">🧠</span>
+                <span class="logo-text">SmartPantry</span>
+                <span class="logo-badge">AI</span>
+            </div>
+            <div class="nav-links">
+                <a href="/dashboard">Dashboard</a>
+                <a href="/inventory" class="active">Inventory</a>
+                <a href="/expiry">Expiry</a>
+                <a href="/shopping">Shopping</a>
+                <a href="/recipes">Recipes</a>
+            </div>
+            <div class="nav-actions">
+                <div class="language-switcher" style="display: flex; gap: 4px; align-items: center; margin-right: 10px;">
+                    <a href="/set-language/en" style="text-decoration: none; font-weight: 600; color: {% if lang == 'en' %}#2d6a4f{% else %}#4a6a7a{% endif %}; padding: 2px 8px; border-radius: 4px;">EN</a>
+                    <span style="color: #4a6a7a;">|</span>
+                    <a href="/set-language/hi" style="text-decoration: none; font-weight: 600; color: {% if lang == 'hi' %}#2d6a4f{% else %}#4a6a7a{% endif %}; padding: 2px 8px; border-radius: 4px;">हिंदी</a>
+                </div>
+                <a href="/logout" class="btn btn-outline btn-sm">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="page-wrap">
+        <div class="page-head">
+            <h1>📦 Inventory</h1>
+            <button class="btn btn-primary" onclick="addItem()">+ Add Item</button>
+        </div>
+
+        <div class="stat-row">
+            <div class="stat-card">
+                <span class="val">{{ total_items }}</span>
+                <span class="lbl">Total Items</span>
+            </div>
+            <div class="stat-card">
+                <span class="val" style="color: #c44536;">{{ low_stock|length }}</span>
+                <span class="lbl">Low Stock</span>
+            </div>
+        </div>
+
+        <div class="inv-table">
+            <div class="inv-row header">
+                <div>Item</div>
+                <div>Quantity</div>
+                <div>Unit</div>
+                <div>Expiry</div>
+                <div>Action</div>
+            </div>
+            {% for item in items %}
+            <div class="inv-row">
+                <div class="name">
+                    {% if 'apple' in item.name.lower() %}🍎
+                    {% elif 'egg' in item.name.lower() %}🥚
+                    {% elif 'bread' in item.name.lower() %}🍞
+                    {% elif 'milk' in item.name.lower() %}🥛
+                    {% elif 'cheese' in item.name.lower() %}🧀
+                    {% elif 'tomato' in item.name.lower() %}🍅
+                    {% elif 'onion' in item.name.lower() %}🧅
+                    {% elif 'chicken' in item.name.lower() %}🍗
+                    {% else %}📦{% endif %}
+                    {{ item.name }}
+                </div>
+                <div>
+                    <span class="qty-pill {% if item.quantity <= 2 %}low{% else %}ok{% endif %}">
+                        {{ item.quantity }}
+                    </span>
+                </div>
+                <div style="color: #5a7a8a; font-size: 14px;">{{ item.unit }}</div>
+                <div style="color: #5a7a8a; font-size: 14px;">{{ item.expiry }}</div>
+                <div>
+                    <button class="btn-update" onclick="updateStockItem({{ item.id }}, '{{ item.name }}')">Update</button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div id="toast"></div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script>
+    function addItem() {
+        const modal = document.createElement('div');
+        modal.id = 'addItemModal';
+        modal.style.cssText = `position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;z-index:10002;padding:20px;`;
+        modal.innerHTML = `
+            <div style="background:white;border-radius:24px;max-width:460px;width:100%;padding:32px;box-shadow:0 32px 64px rgba(0,0,0,0.2);">
+                <h3 style="color:#1b4332;margin-bottom:16px;">📦 Add New Item</h3>
+                <input id="addItemName" placeholder="Item name" style="width:100%;padding:12px;border:2px solid #e0e0e0;border-radius:12px;margin-bottom:10px;font-size:14px;outline:none;">
+                <input id="addItemQuantity" type="number" placeholder="Quantity" value="1" style="width:100%;padding:12px;border:2px solid #e0e0e0;border-radius:12px;margin-bottom:10px;font-size:14px;outline:none;">
+                <input id="addItemUnit" placeholder="Unit (pcs, kg, L)" value="pcs" style="width:100%;padding:12px;border:2px solid #e0e0e0;border-radius:12px;margin-bottom:10px;font-size:14px;outline:none;">
+                <input id="addItemExpiry" type="date" style="width:100%;padding:12px;border:2px solid #e0e0e0;border-radius:12px;margin-bottom:10px;font-size:14px;outline:none;">
+                <input id="addItemCategory" placeholder="Category" value="Other" style="width:100%;padding:12px;border:2px solid #e0e0e0;border-radius:12px;margin-bottom:16px;font-size:14px;outline:none;">
+                <div style="display:flex;gap:10px;justify-content:flex-end;">
+                    <button onclick="document.getElementById('addItemModal').remove()" style="padding:10px 24px;border:none;border-radius:30px;background:#f0f0f0;color:#4a6a7a;font-weight:600;cursor:pointer;">Cancel</button>
+                    <button onclick="confirmAddItem()" style="padding:10px 24px;border:none;border-radius:30px;background:#2d6a4f;color:white;font-weight:600;cursor:pointer;">Add Item</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        const d = new Date(); d.setDate(d.getDate()+30);
+        document.getElementById('addItemExpiry').value = d.toISOString().split('T')[0];
+        setTimeout(() => document.getElementById('addItemName').focus(), 100);
+    }
+
+    function confirmAddItem() {
+        const name = document.getElementById('addItemName').value.trim();
+        const quantity = document.getElementById('addItemQuantity').value;
+        const unit = document.getElementById('addItemUnit').value.trim();
+        const expiry = document.getElementById('addItemExpiry').value;
+        const category = document.getElementById('addItemCategory').value.trim();
+        if (!name) { alert('Please enter item name'); return; }
+        fetch('/api/inventory', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({name, quantity: parseInt(quantity)||1, unit: unit||'pcs', expiry: expiry||'2026-12-31', category: category||'Other'})
+        })
+        .then(r => r.json())
+        .then(d => { if (d.success) { document.getElementById('addItemModal').remove(); location.reload(); } });
+    }
+
+    function updateStockItem(id, name) {
+        const qty = prompt(`New quantity for "${name}":`);
+        if (qty === null || isNaN(qty) || parseInt(qty) < 0) return;
+        fetch(`/api/inventory/${id}`, {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({quantity: parseInt(qty)})
+        })
+        .then(r => r.json())
+        .then(d => { if (d.success) location.reload(); });
+    }
+
+    function showToast(msg) {
+        const t = document.createElement('div');
+        t.textContent = msg;
+        t.style.cssText = `position:fixed;bottom:30px;right:30px;background:#1b4332;color:white;padding:14px 24px;border-radius:30px;font-weight:600;z-index:99999;`;
+        document.body.appendChild(t);
+        setTimeout(() => t.remove(), 3000);
+    }
+    </script>
+</body>
+</html>

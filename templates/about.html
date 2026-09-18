@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - SmartPantry AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="floating-3d">🥑</div>
+    <div class="floating-3d">🍅</div>
+    <div class="floating-3d">🥦</div>
+    <div class="floating-3d">🍆</div>
+    <div class="floating-3d">🌽</div>
+    <div class="floating-3d">🥕</div>
+    <div class="floating-3d">🍎</div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <span>🧠</span>
+                <span>SmartPantry AI</span>
+            </div>
+            <div class="nav-links">
+                <a href="{{ url_for('index') }}">Home</a>
+                <a href="{{ url_for('features') }}">Features</a>
+                <a href="{{ url_for('recipes') }}">Recipes</a>
+                <a href="{{ url_for('about') }}" class="active">About Us</a>
+                <a href="{{ url_for('contact') }}">Contact</a>
+            </div>
+            <div class="nav-actions">
+                {% if session.get('username') %}
+                    <a href="{{ url_for('dashboard') }}" class="btn-primary">Dashboard</a>
+                    <a href="{{ url_for('logout') }}" class="btn-outline">Logout</a>
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="btn-primary">Login</a>
+                    <a href="{{ url_for('signup') }}" class="btn-outline">Sign Up</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Content -->
+    <div class="about-page">
+
+        <!-- Hero -->
+        <section class="about-hero">
+            <span class="about-tag">About Us</span>
+            <h1>Revolutionizing the Way You Manage Your Kitchen</h1>
+            <p>SmartPantry AI combines artificial intelligence with everyday cooking to eliminate food waste, save money, and make meal planning effortless.</p>
+        </section>
+
+        <!-- Story -->
+        <section class="about-story">
+            <div class="story-block">
+                <div class="story-icon">🌟</div>
+                <h2>Our Story</h2>
+                <p>SmartPantry AI was born out of a simple yet frustrating problem — the average household throws away <strong>nearly 30% of the food it buys</strong> every year. That's hundreds of dollars wasted, countless trips to the grocery store, and a significant environmental impact. We asked ourselves: <em>what if your kitchen could think for itself?</em></p>
+                <p>In 2024, a small team of engineers, data scientists, and food enthusiasts came together with a shared vision — to build an intelligent assistant that understands your pantry, learns your habits, and helps you make smarter decisions. The result is SmartPantry AI, a system that blends cutting-edge machine learning with the warmth of home cooking.</p>
+            </div>
+
+            <div class="story-block">
+                <div class="story-icon">🎯</div>
+                <h2>Our Mission</h2>
+                <p>Our mission is to empower every household to take control of their kitchen. We believe that managing groceries should not be a chore — it should be smart, sustainable, and even enjoyable. By leveraging 15+ AI algorithms, we help families reduce waste, save money, and eat healthier — all while making the most of what they already have.</p>
+            </div>
+
+            <div class="story-block">
+                <div class="story-icon">💡</div>
+                <h2>What Makes Us Different</h2>
+                <p>Unlike traditional pantry apps that simply store lists, SmartPantry AI <strong>actively thinks</strong> about your kitchen. It predicts which items will run out soon, alerts you before food expires, suggests recipes based on what's available, and analyzes your spending patterns to keep your budget in check. It's not just an organizer — it's your personal kitchen intelligence.</p>
+            </div>
+        </section>
+
+        <!-- Stats -->
+        <section class="about-stats-row">
+            <div class="stat-box">
+                <span class="stat-number">15+</span>
+                <span class="stat-label">AI Algorithms</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-number">50K+</span>
+                <span class="stat-label">Active Users</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-number">30%</span>
+                <span class="stat-label">Waste Reduced</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-number">4.8⭐</span>
+                <span class="stat-label">User Rating</span>
+            </div>
+        </section>
+
+        <!-- Values -->
+        <section class="about-section">
+            <div class="about-section-header">
+                <span class="about-tag">Our Values</span>
+                <h2>What Drives Us Every Day</h2>
+            </div>
+            <div class="about-cards-grid">
+                <div class="about-card">
+                    <div class="about-card-icon">🌱</div>
+                    <h3>Sustainability First</h3>
+                    <p>Every algorithm we build is designed to reduce food waste and promote eco-friendly living.</p>
+                </div>
+                <div class="about-card">
+                    <div class="about-card-icon">🔒</div>
+                    <h3>Privacy &amp; Trust</h3>
+                    <p>Your pantry data belongs to you. We use secure encryption and never share your information.</p>
+                </div>
+                <div class="about-card">
+                    <div class="about-card-icon">🤝</div>
+                    <h3>User-Centric Design</h3>
+                    <p>We listen to our community and continuously improve based on real user feedback.</p>
+                </div>
+                <div class="about-card">
+                    <div class="about-card-icon">⚡</div>
+                    <h3>Innovation Always</h3>
+                    <p>We invest in cutting-edge AI research to bring you smarter features every month.</p>
+                </div>
+                <div class="about-card">
+                    <div class="about-card-icon">💚</div>
+                    <h3>Healthier Living</h3>
+                    <p>Our meal planner encourages balanced diets and home-cooked meals for a healthier lifestyle.</p>
+                </div>
+                <div class="about-card">
+                    <div class="about-card-icon">💰</div>
+                    <h3>Save Real Money</h3>
+                    <p>Users save an average of $60 per month by avoiding duplicate purchases and food waste.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Impact -->
+        <section class="about-section">
+            <div class="about-section-header">
+                <span class="about-tag">Our Impact</span>
+                <h2>Real Results, Real People</h2>
+                <p>Here's what our users have achieved with SmartPantry AI</p>
+            </div>
+            <div class="about-cards-grid">
+                <div class="about-card">
+                    <div class="about-card-icon">📉</div>
+                    <h3>Reduced Food Waste by 30%</h3>
+                    <p>Our expiry alerts and usage predictions help families use food before it spoils, cutting waste dramatically.</p>
+                </div>
+                <div class="about-card">
+                    <div class="about-card-icon">💰</div>
+                    <h3>Saved $720 per Year</h3>
+                    <p>By avoiding duplicate purchases and optimizing grocery lists, families save enough for a vacation.</p>
+                </div>
+                <div class="about-card">
+                    <div class="about-card-icon">🍽️</div>
+                    <h3>Cooked 3x More Home Meals</h3>
+                    <p>Recipe recommendations based on available ingredients make cooking at home easier than ordering out.</p>
+                </div>
+                <div class="about-card">
+                    <div class="about-card-icon">⏱️</div>
+                    <h3>Saved 5+ Hours per Week</h3>
+                    <p>No more last-minute store runs or wondering what to cook — SmartPantry plans it all for you.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Technology -->
+        <section class="about-section">
+            <div class="about-section-header">
+                <span class="about-tag">Technology</span>
+                <h2>Built with Cutting-Edge AI</h2>
+                <p>The intelligent algorithms powering SmartPantry AI</p>
+            </div>
+            <div class="about-cards-grid">
+                <div class="about-card">
+                    <div class="about-card-icon">🔬</div>
+                    <h3>Time-Series Forecasting</h3>
+                    <p>Predicts when items will run out based on your consumption patterns.</p>
+                </div>
+                <div class="about-card">
+                    <div class="about-card-icon">🧠</div>
+                    <h3>Content-Based Filtering</h3>
+                    <p>Recommends recipes that match the exact ingredients in your pantry.</p>
+                </div>
+                <div class="about-card">
+                    <div class="about-card-icon">📊</div>
+                    <h3>Pattern Recognition</h3>
+                    <p>Learns your habits to make smarter suggestions over time.</p>
+                </div>
+                <div class="about-card">
+                    <div class="about-card-icon">🔤</div>
+                    <h3>String Matching</h3>
+                    <p>Detects duplicate entries and keeps your inventory clean.</p>
+                </div>
+                <div class="about-card">
+                    <div class="about-card-icon">📅</div>
+                    <h3>Date Comparison</h3>
+                    <p>Triggers alerts before food expires to minimize waste.</p>
+                </div>
+                <div class="about-card">
+                    <div class="about-card-icon">💰</div>
+                    <h3>Trend Analysis</h3>
+                    <p>Analyzes spending to forecast future grocery expenses.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA -->
+        <section class="about-cta">
+    <h2>Ready to Transform Your Kitchen?</h2>
+    <p>Join 50,000+ users already saving time, money, and food with SmartPantry AI.</p>
+    <div class="about-cta-buttons">
+        <a href="{{ url_for('signup') }}" class="btn-primary">Get Started Free</a>
+        <a href="{{ url_for('features') }}" class="btn-outline">Explore Features</a>
+    </div>
+</section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>🧠 SmartPantry AI</h4>
+                <p>Intelligent kitchen management made simple. Reduce waste, save money, eat better.</p>
+            </div>
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <a href="{{ url_for('index') }}">Home</a>
+                <a href="{{ url_for('features') }}">Features</a>
+                <a href="{{ url_for('recipes') }}">Recipes</a>
+                <a href="{{ url_for('about') }}">About</a>
+            </div>
+            <div class="footer-section">
+                <h4>Support</h4>
+                <a href="{{ url_for('contact') }}">Contact</a>
+                <a href="#">FAQ</a>
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms</a>
+            </div>
+            <div class="footer-section">
+                <h4>Connect</h4>
+                <div class="social-links">
+                    <a href="https://instagram.com/smartpantry.ai" target="_blank">📷</a>
+                    <a href="https://wa.me/919321608860" target="_blank">💬</a>
+                    <a href="mailto:support@smartpantry.ai">✉️</a>
+                    <a href="tel:+919321608860">📞</a>
+                </div>
+                <p style="margin-top: 0.5rem; font-size: 0.8rem;">© 2026 SmartPantry AI</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

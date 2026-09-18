@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expiry - {{ text('app_name', lang) }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .page-wrap { max-width: 900px; margin: 0 auto; padding: 30px 20px; }
+        .page-head { margin-bottom: 24px; }
+        .page-head h1 { font-size: 2rem; color: #1b4332; }
+        .expiry-card { background: rgba(255,255,255,0.85); backdrop-filter: blur(10px); border-radius: 16px; padding: 20px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid #2d6a4f; box-shadow: 0 4px 16px rgba(0,0,0,0.05); }
+        .expiry-card.urgent { border-left-color: #e76f51; background: #fff5f5; }
+        .expiry-card.warn { border-left-color: #f4a261; background: #fffaf3; }
+        .expiry-card .info strong { font-size: 1.05rem; color: #1b4332; display: block; }
+        .expiry-card .info span { font-size: 13px; color: #5a7a8a; }
+        .days-badge { padding: 6px 16px; border-radius: 20px; font-weight: 700; font-size: 14px; }
+        .days-badge.urgent { background: #ffebee; color: #c44536; }
+        .days-badge.warn { background: #fff3e0; color: #b26a00; }
+        .days-badge.ok { background: #e8f5e9; color: #2d6a4f; }
+        .empty { text-align: center; padding: 60px 20px; color: #5a7a8a; }
+        .empty .icon { font-size: 4rem; display: block; margin-bottom: 12px; }
+    </style>
+</head>
+<body>
+    <div class="floating-3d">🥑</div>
+    <div class="floating-3d">🍅</div>
+    <div class="floating-3d">🥦</div>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <span class="logo-icon">🧠</span>
+                <span class="logo-text">SmartPantry</span>
+                <span class="logo-badge">AI</span>
+            </div>
+            <div class="nav-links">
+                <a href="/dashboard">Dashboard</a>
+                <a href="/inventory">Inventory</a>
+                <a href="/expiry" class="active">Expiry</a>
+                <a href="/shopping">Shopping</a>
+                <a href="/recipes">Recipes</a>
+            </div>
+            <div class="nav-actions">
+                <div class="language-switcher" style="display: flex; gap: 4px; align-items: center; margin-right: 10px;">
+                    <a href="/set-language/en" style="text-decoration: none; font-weight: 600; color: {% if lang == 'en' %}#2d6a4f{% else %}#4a6a7a{% endif %}; padding: 2px 8px; border-radius: 4px;">EN</a>
+                    <span style="color: #4a6a7a;">|</span>
+                    <a href="/set-language/hi" style="text-decoration: none; font-weight: 600; color: {% if lang == 'hi' %}#2d6a4f{% else %}#4a6a7a{% endif %}; padding: 2px 8px; border-radius: 4px;">हिंदी</a>
+                </div>
+                <a href="/logout" class="btn btn-outline btn-sm">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="page-wrap">
+        <div class="page-head">
+            <h1>⏰ Expiry Alerts</h1>
+            <p style="color: #5a7a8a;">Items expiring within 7 days</p>
+        </div>
+
+        {% if expiring %}
+            {% for item in expiring %}
+            <div class="expiry-card {% if item.days_left <= 1 %}urgent{% elif item.days_left <= 3 %}warn{% endif %}">
+                <div class="info">
+                    <strong>
+                        {% if 'apple' in item.name.lower() %}🍎
+                        {% elif 'egg' in item.name.lower() %}🥚
+                        {% elif 'bread' in item.name.lower() %}🍞
+                        {% elif 'milk' in item.name.lower() %}🥛
+                        {% elif 'cheese' in item.name.lower() %}🧀
+                        {% elif 'tomato' in item.name.lower() %}🍅
+                        {% else %}📦{% endif %}
+                        {{ item.name }}
+                    </strong>
+                    <span>Quantity: {{ item.quantity }} {{ item.unit }} · Expires: {{ item.expiry }}</span>
+                </div>
+                <span class="days-badge {% if item.days_left <= 1 %}urgent{% elif item.days_left <= 3 %}warn{% else %}ok{% endif %}">
+                    {% if item.days_left == 0 %}Today!{% else %}{{ item.days_left }} day{{ 's' if item.days_left > 1 else '' }} left{% endif %}
+                </span>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty">
+                <span class="icon">✅</span>
+                <p>No items expiring soon!</p>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ text('features', lang) }} - {{ text('app_name', lang) }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .features-page {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            text-align: center;
+        }
+        .features-page h1 {
+            font-size: 2.5rem;
+            color: #1b4332;
+            margin-bottom: 10px;
+        }
+        .features-page .subtitle {
+            font-size: 1.1rem;
+            color: #4a6a7a;
+            margin-bottom: 40px;
+        }
+        .feature-item-center {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px 35px;
+            margin-bottom: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+            transition: all 0.3s;
+            text-align: center;
+        }
+        .feature-item-center:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.06);
+        }
+        .feature-item-center .icon {
+            font-size: 2.8rem;
+            display: block;
+            margin-bottom: 10px;
+        }
+        .feature-item-center h3 {
+            font-size: 1.3rem;
+            color: #1b4332;
+            margin-bottom: 8px;
+        }
+        .feature-item-center p {
+            font-size: 1rem;
+            color: #4a6a7a;
+            line-height: 1.6;
+            max-width: 600px;
+            margin: 0 auto 10px auto;
+        }
+        .feature-item-center .algo-tag {
+            display: inline-block;
+            background: rgba(45, 106, 79, 0.08);
+            color: #2d6a4f;
+            padding: 4px 16px;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border: 1px solid rgba(45, 106, 79, 0.1);
+        }
+        .back-button {
+            display: inline-block;
+            margin-top: 20px;
+        }
+        @media (max-width: 600px) {
+            .features-page { padding: 20px 15px; }
+            .features-page h1 { font-size: 1.8rem; }
+            .feature-item-center { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-3d">🥑</div>
+    <div class="floating-3d">🍅</div>
+    <div class="floating-3d">🥦</div>
+    <div class="floating-3d">🍆</div>
+    <div class="floating-3d">🌽</div>
+    <div class="floating-3d">🥕</div>
+    <div class="floating-3d">🍎</div>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <span class="logo-icon">🧠</span>
+                <span class="logo-text">SmartPantry</span>
+                <span class="logo-badge">AI</span>
+            </div>
+            <div class="nav-links">
+                <a href="/">{{ text('home', lang) }}</a>
+                <a href="/features" class="active">{{ text('features', lang) }}</a>
+                <a href="/recipes">{{ text('recipes', lang) }}</a>
+                <a href="/about">{{ text('about', lang) }}</a>
+                <a href="/contact">{{ text('contact', lang) }}</a>
+            </div>
+            <div class="nav-actions">
+                <div class="language-switcher" style="display: flex; gap: 4px; align-items: center; margin-right: 10px;">
+                    <a href="/set-language/en" style="text-decoration: none; font-weight: 600; color: {% if lang == 'en' %}#2d6a4f{% else %}#4a6a7a{% endif %}; padding: 2px 8px; border-radius: 4px; {% if lang == 'en' %}background: rgba(45,106,79,0.1);{% endif %}">EN</a>
+                    <span style="color: #4a6a7a;">|</span>
+                    <a href="/set-language/hi" style="text-decoration: none; font-weight: 600; color: {% if lang == 'hi' %}#2d6a4f{% else %}#4a6a7a{% endif %}; padding: 2px 8px; border-radius: 4px; {% if lang == 'hi' %}background: rgba(45,106,79,0.1);{% endif %}">हिंदी</a>
+                </div>
+                {% if session.get('username') %}
+                    <a href="/dashboard" class="btn btn-primary btn-sm">{{ text('dashboard', lang) }}</a>
+                    <a href="/logout" class="btn btn-outline btn-sm">{{ text('logout', lang) }}</a>
+                {% else %}
+                    <a href="/login" class="btn btn-primary btn-sm">{{ text('login', lang) }}</a>
+                    <a href="/signup" class="btn btn-outline btn-sm">{{ text('signup', lang) }}</a>
+                {% endif %}
+            </div>
+            <button class="nav-toggle" onclick="toggleNav()">☰</button>
+        </div>
+    </nav>
+
+    <div class="features-page">
+        <h1>🚀 {{ text('features', lang) }}</h1>
+        <p class="subtitle">{{ text('features_subtitle', lang) }}</p>
+
+        <div class="feature-item-center">
+            <span class="icon">🤖</span>
+            <h3>{{ text('ai_algorithms', lang) }}</h3>
+            <p>{{ text('hero_description', lang) }}</p>
+            <span class="algo-tag">Time-Series Forecasting</span>
+        </div>
+
+        <div class="feature-item-center">
+            <span class="icon">🍽️</span>
+            <h3>{{ text('recipe_recommendations', lang) }}</h3>
+            <p>{{ text('hero_description', lang) }}</p>
+            <span class="algo-tag">Content-Based Recommendation</span>
+        </div>
+
+        <div class="feature-item-center">
+            <span class="icon">📋</span>
+            <h3>{{ text('shopping_list', lang) }}</h3>
+            <p>{{ text('hero_description', lang) }}</p>
+            <span class="algo-tag">Recommendation Algorithm</span>
+        </div>
+
+        <div class="feature-item-center">
+            <span class="icon">⏰</span>
+            <h3>{{ text('expiry_alerts', lang) }}</h3>
+            <p>{{ text('hero_description', lang) }}</p>
+            <span class="algo-tag">Date Comparison Algorithm</span>
+        </div>
+
+        <div class="feature-item-center">
+            <span class="icon">💰</span>
+            <h3>{{ text('budget_tracker', lang) }}</h3>
+            <p>{{ text('hero_description', lang) }}</p>
+            <span class="algo-tag">Rule-Based Recommendation</span>
+        </div>
+
+        <div class="feature-item-center">
+            <span class="icon">📊</span>
+            <h3>{{ text('analytics', lang) }}</h3>
+            <p>{{ text('hero_description', lang) }}</p>
+            <span class="algo-tag">Pattern Recognition</span>
+        </div>
+
+        <a href="/" class="btn btn-primary back-button">← {{ text('home', lang) }}</a>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>🧠 {{ text('app_name', lang) }}</h4>
+                <p>{{ text('hero_description', lang) }}</p>
+            </div>
+            <div class="footer-section">
+                <h4>{{ text('quick_links', lang) }}</h4>
+                <a href="/">{{ text('home', lang) }}</a>
+                <a href="/features">{{ text('features', lang) }}</a>
+                <a href="/recipes">{{ text('recipes', lang) }}</a>
+                <a href="/about">{{ text('about', lang) }}</a>
+            </div>
+            <div class="footer-section">
+                <h4>{{ text('support', lang) }}</h4>
+                <a href="/contact">{{ text('contact', lang) }}</a>
+                <a href="#">FAQ</a>
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms</a>
+            </div>
+            <div class="footer-section">
+                <h4>{{ text('connect', lang) }}</h4>
+                <div class="social-links">
+                    <a href="#">📱</a>
+                    <a href="#">🐦</a>
+                    <a href="#">📘</a>
+                    <a href="#">📷</a>
+                </div>
+                <p style="margin-top: 0.5rem; font-size: 0.8rem;">© 2026 {{ text('app_name', lang) }}</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function toggleNav() {
+            document.querySelector('.nav-links').classList.toggle('show');
+            document.querySelector('.nav-actions').classList.toggle('show');
+        }
+    </script>
+</body>
+</html>

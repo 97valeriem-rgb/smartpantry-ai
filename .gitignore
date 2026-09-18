@@ -1,0 +1,15 @@
+﻿venv/
+.venv/
+env/
+ENV/
+__pycache__/
+*.py[cod]
+*$py.class
+data/*.json
+!data/.gitkeep
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log
+.env
